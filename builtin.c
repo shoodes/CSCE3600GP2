@@ -14,7 +14,7 @@ void change_directory(char *path) {
         perror("Failed to change directory");
     }
 }
-
+// KEVIN "CD" 
 void print_working_directory() {
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
@@ -23,5 +23,4 @@ void print_working_directory() {
         perror("Failed to get current directory");
     }
 }
-// ADD YOUR STUFF HERE
-
+// KEVIN "CD" 

@@ -4,7 +4,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <fcntl.h>
-#include "major2cd.h"
+#include "builtin.h"
 
 #define MAX_LINE_LENGTH 512
 #define MAX_ARGS 128
@@ -124,7 +124,7 @@ void execute_command(char *command) {
     char *args[MAX_ARGS];
 
     split_command(command, &executable, args);
-
+// KEVIN "CD" 
     if (strcmp(executable, "cd") == 0) {
         change_directory(args[1]);
         return;
@@ -132,8 +132,8 @@ void execute_command(char *command) {
      else if (strcmp(executable, "pwd") == 0) {
         print_working_directory();
         return;
-        }
-
+        }// KEVIN "CD" 
+//ADD STUFF HERE
     int pid = fork();
 
     if (pid == 0) {
