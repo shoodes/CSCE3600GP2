@@ -134,6 +134,11 @@ void execute_command(char *command) {
         return;
         }// KEVIN "CD" 
 //ADD STUFF HERE
+      else if (strcmp(executable, "exit") == 0){
+         int exit_status = 0;
+         exit(exit_status);
+         return;
+        }//Dewey exit
     int pid = fork();
 
     if (pid == 0) {
