@@ -1,8 +1,5 @@
 # CSCE3600GP2
 
-
-# CSCE3600GP2
-
 CSCE3600 - Group Project 2
 
 **Our team consists of four members:**
