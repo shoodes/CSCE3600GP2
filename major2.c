@@ -88,6 +88,11 @@ void execute_pipeline(char **args) {
         cmd2[pipe_index] = args[i];
     }
     cmd2[pipe_index] = NULL;
+    
+    for (i = pipe_index + 1, pipe_index = 0; args[i]; i++, pipe_index++) {
+        cmd3[pipe_index] = args[i];
+    }
+    cmd3[pipe_index] = NULL;
 
     int pipe_fd[2];
     pipe(pipe_fd);
@@ -112,11 +117,24 @@ void execute_pipeline(char **args) {
                 perror("Failed to execute command 2");
         exit(1);
     }
-
+    
+    if (pid3 == 0) {
+        dup2(pipe_fd[0], STDIN_FILENO);
+        close(pipe_fd[0]);
+        close(pipe_fd[1]);
+        execvp(cmd3[0], cmd3);
+                perror("Failed to execute command 3");
+        exit(1);
+    }
+    
+    int pid3 = fork();
+    
     close(pipe_fd[0]);
     close(pipe_fd[1]);
+    close(pipe_fd[2]);
     waitpid(pid1, NULL, 0);
     waitpid(pid2, NULL, 0);
+    waitpid(pid3, NULL, 0);
 }
 
 void execute_command(char *command) {
