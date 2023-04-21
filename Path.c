@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <assert.h>
 #include "Path.h"
 
 static char paths[MAX_PATHS][MAX_PATH_LENGTH];
@@ -9,19 +10,40 @@ static int num_paths;
 
 void init_path() {
     char *path = getenv("PATH");
-    char *token = strtok(path, ":");
+    if (path == NULL) {
+        printf("Failed to get PATH environment variable\n");
+        exit(1);
+    }
+
+   // printf("Original PATH: %s\n", path); PATH DEBUGGING STATEMENTS
+
+    char *path_copy = strdup(path);
+    if (path_copy == NULL) {
+        perror("Failed to allocate memory");
+        exit(1);
+    }
+
+    //printf("PATH copy: %s\n", path_copy); PATH DEBUGGING STATEMENTS
+
+    char *token = strtok(path_copy, ":");
 
     while (token != NULL && num_paths < MAX_PATHS) {
+        //printf("Adding path: %s\n", token); PATH DEBUGGING STATEMENTS
         strcpy(paths[num_paths], token);
         token = strtok(NULL, ":");
         num_paths++;
     }
-}
 
+   // printf("Finished initializing paths\n"); PATH DEBUGGING STATEMENTS
+
+    free(path_copy);
+}
 void print_path() {
+    printf("In print_path\n");
     printf("Path: ");
 
     for (int i = 0; i < num_paths; i++) {
+        printf("Printing path %d\n", i);
         printf("%s", paths[i]);
         if (i != num_paths - 1) {
             printf(":");
@@ -29,7 +51,6 @@ void print_path() {
     }
     printf("\n");
 }
-
 void append_path(char *path) {
     if (num_paths == MAX_PATHS) {
         printf("Cannot add path, maximum number of paths reached\n");
@@ -84,15 +105,19 @@ char* get_full_path(char *command) {
 }
 
 void handle_path_command(char **args) {
+    //printf("handle_path_command: Handling path command\n"); PATH DEBUGGING STATEMENTS
     if (args[1] == NULL) {
+        printf("handle_path_command: No arguments\n");
         print_path();
     } else if (strcmp(args[1], "+") == 0) {
+        printf("handle_path_command: Adding path\n");
         if (args[2] == NULL) {
             printf("Invalid arguments\n");
             return;
         }
         append_path(args[2]);
     } else if (strcmp(args[1], "-") == 0) {
+        printf("handle_path_command: Removing path\n");
         if (args[2] == NULL) {
             printf("Invalid arguments\n");
             return;

@@ -7,7 +7,11 @@
 #include <limits.h>
 #include <signal.h>
 #include "myhistory.h"
+#include <readline/readline.h>
+#include <readline/history.h>
 #include "Path.h"
+#include "alias.h"
+
 
 #define MAX_LINE_LENGTH 512
 #define MAX_ARGS 128
@@ -148,9 +152,11 @@ void exit_shell() {
     exit(0);
 }
 void execute_command(char *command) {
-    pid_t child_pid; //process groups
+    pid_t child_pid;
     char *executable;
     char *args[MAX_ARGS];
+
+    command = expand_alias(command);
     split_command(command, &executable, args);
 
     if (strcmp(executable, "cd") == 0) {
@@ -168,6 +174,11 @@ void execute_command(char *command) {
         add_to_history(command);
     } else if (strcmp(executable, "path") == 0) {
         handle_path_command(args);
+        add_to_history(command);
+    } else if (strcmp(executable, "alias") == 0) {
+        handle_alias_command(command);
+        add_to_history(command);
+        return;
     } else {
         add_to_history(command);
         child_pid = fork(); // process groups
@@ -181,7 +192,7 @@ void execute_command(char *command) {
             } else {
                 if (execvp(executable, args) == -1) {
                     perror("Failed to execute command");
-                    exit(1);
+                    _exit(1);
                 }
             }
         } else if (child_pid > 0) {
@@ -195,6 +206,7 @@ void execute_command(char *command) {
         }
     }
 }
+
 void sig_handler(int signal) { //sig handler
     if (signal == SIGINT) {
         printf("\nSIGINT received. Ignoring.\n");
@@ -205,16 +217,19 @@ void sig_handler(int signal) { //sig handler
     }
 }
 
+
 int main(int argc, char *argv[]) {
     // Add signal handling
     signal(SIGINT, sig_handler); //sig handler
     signal(SIGTSTP, sig_handler); // sig handler
+    signal(SIGTTOU, SIG_IGN); // sig handler to ignore SIGTTOU
 
     init_path();
-char input[MAX_LINE_LENGTH];
-char *commands[MAX_ARGS];
-int num_commands;
-if (argc == 1) { // Interactive mode
+
+    char input[MAX_LINE_LENGTH];
+    char *commands[MAX_ARGS];
+    int num_commands;
+    if (argc == 1) { // Interactive mode
     while (1) {
         printf("myshell> ");
         fgets(input, MAX_LINE_LENGTH, stdin);
@@ -226,27 +241,28 @@ if (argc == 1) { // Interactive mode
         }
     }
 } else if (argc == 2) { // Batch mode
-    FILE *file = fopen(argv[1], "r");
-    if (!file) {
-        perror("Failed to open file");
+        FILE *file = fopen(argv[1], "r");
+        if (!file) {
+            perror("Failed to open file");
+            exit(1);
+        }
+
+        while (fgets(input, MAX_LINE_LENGTH, file)) {
+            printf("%s", input);
+
+            expand_alias(input); // Expand aliases in input
+            parse_input(input, commands, &num_commands);
+
+            for (int i = 0; i < num_commands; i++) {
+                execute_command(commands[i]);
+            }
+        }
+
+        fclose(file);
+    } else {
+        fprintf(stderr, "Usage: %s [batch_file]\n", argv[0]);
         exit(1);
     }
 
-    while (fgets(input, MAX_LINE_LENGTH, file)) {
-        printf("%s", input);
-
-        parse_input(input, commands, &num_commands);
-
-        for (int i = 0; i < num_commands; i++) {
-            execute_command(commands[i]);
-        }
-    }
-
-    fclose(file);
-} else {
-    fprintf(stderr, "Usage: %s [batch_file]\n", argv[0]);
-    exit(1);
-}
-
-return 0;
+    return 0;
 }
