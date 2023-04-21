@@ -1,4 +1,4 @@
-//DOUG
+#DOUG
 #!/bin/bash
 
 HISTFILE=~/.myhistory
