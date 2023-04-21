@@ -2,6 +2,7 @@
 
 
 **Compile using "make"**
+
 **use make clean to clean up object files**
 ----------------------------------
 CSCE3600 - Group Project 2
