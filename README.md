@@ -20,8 +20,8 @@ CSCE3600 - Group Project 2
 
 We split up the work as followed
 
-    Kevin was responsible for implementing the basic shell, cd, pwd, redirection, and the exit command.
-    Dewey was responsible for implementing PATH, piplining, alias and debugging some of the program
+    Kevin was responsible for implementing the basic shell, cd, pwd, redirection, debugging, makefile
+    Dewey was responsible for implementing PATH, piplining, exit and debugging some of the program
     Abdul was responsible for implementing myhistory and debugging the program
     Doug  was responsible for implementing the sigint control and myhistory
     
